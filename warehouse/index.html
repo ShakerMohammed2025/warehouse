@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام جرد المستودع</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --danger-color: #e74c3c;
+            --dark-color: #34495e;
+            --light-color: #ecf0f1;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: var(--dark-color);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        nav {
+            display: flex;
+            justify-content: center;
+            background-color: var(--primary-color);
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        nav button {
+            background: none;
+            border: none;
+            color: white;
+            padding: 15px 20px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        nav button:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        nav button.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            font-weight: bold;
+        }
+        
+        .section {
+            display: none;
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .section.active {
+            display: block;
+        }
+        
+        h2 {
+            color: var(--dark-color);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--light-color);
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        button.danger {
+            background-color: var(--danger-color);
+        }
+        
+        button.danger:hover {
+            background-color: #c0392b;
+        }
+        
+        button.success {
+            background-color: var(--secondary-color);
+        }
+        
+        button.success:hover {
+            background-color: #27ae60;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: right;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background-color: var(--light-color);
+            font-weight: bold;
+        }
+        
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            display: none;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .stat-box {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .stat-box h3 {
+            color: var(--dark-color);
+            margin-bottom: 10px;
+        }
+        
+        .stat-box .value {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            nav {
+                flex-direction: column;
+            }
+            
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>نظام جرد المستودع</h1>
+        </header>
+        
+        <nav>
+            <button class="nav-btn active" data-target="dashboard">لوحة التحكم</button>
+            <button class="nav-btn" data-target="products">إدارة المنتجات</button>
+            <button class="nav-btn" data-target="inventory">حركة المستودع</button>
+            <button class="nav-btn" data-target="transactions">سجل الحركات</button>
+            <button class="nav-btn" data-target="reports">التقارير</button>
+        </nav>
+        
+        <div id="alertBox" class="alert"></div>
+        
+        <!-- لوحة التحكم -->
+        <section id="dashboard" class="section active">
+            <h2>لوحة التحكم</h2>
+            
+            <div class="stats-container">
+                <div class="stat-box">
+                    <h3>إجمالي المنتجات</h3>
+                    <div class="value" id="totalProducts">0</div>
+                </div>
+                <div class="stat-box">
+                    <h3>إجمالي الكمية في المخزون</h3>
+                    <div class="value" id="totalQuantity">0</div>
+                </div>
+                <div class="stat-box">
+                    <h3>إجمالي قيمة المخزون</h3>
+                    <div class="value" id="totalValue">0</div>
+                </div>
+            </div>
+            
+            <h2>المنتجات منخفضة المخزون</h2>
+            <table id="lowStockTable">
+                <thead>
+                    <tr>
+                        <th>اسم المنتج</th>
+                        <th>الكمية المتاحة</th>
+                        <th>حد التنبيه</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- سيتم ملؤها بواسطة JavaScript -->
+                </tbody>
+            </table>
+        </section>
+        
+        <!-- إدارة المنتجات -->
+        <section id="products" class="section">
+            <h2>إدارة المنتجات</h2>
+            
+            <form id="productForm">
+                <input type="hidden" id="productId">
+                <div class="form-group">
+                    <label for="productName">اسم المنتج</label>
+                    <input type="text" id="productName" required>
+                </div>
+                <div class="form-group">
+                    <label for="productDescription">وصف المنتج</label>
+                    <textarea id="productDescription"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="productCategory">الفئة</label>
+                    <input type="text" id="productCategory">
+                </div>
+                <div class="form-group">
+                    <label for="productPrice">سعر الوحدة</label>
+                    <input type="number" id="productPrice" step="0.01" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="productAlertQuantity">حد التنبيه (الحد الأدنى للكمية)</label>
+                    <input type="number" id="productAlertQuantity" min="0" value="5">
+                </div>
+                <button type="submit" class="success">حفظ المنتج</button>
+                <button type="button" id="resetProductForm">جديد</button>
+            </form>
+            
+            <h2>قائمة المنتجات</h2>
+            <table id="productsTable">
+                <thead>
+                    <tr>
+                        <th>اسم المنتج</th>
+                        <th>الفئة</th>
+                        <th>السعر</th>
+                        <th>الكمية</th>
+                        <th>الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- سيتم ملؤها بواسطة JavaScript -->
+                </tbody>
+            </table>
+        </section>
+        
+        <!-- حركة المستودع -->
+        <section id="inventory" class="section">
+            <h2>حركة المستودع</h2>
+            
+            <form id="transactionForm">
+                <div class="form-group">
+                    <label for="transactionType">نوع الحركة</label>
+                    <select id="transactionType" required>
+                        <option value="in">دخول إلى المستودع</option>
+                        <option value="out">خروج من المستودع</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="transactionProduct">المنتج</label>
+                    <select id="transactionProduct" required>
+                        <option value="">اختر المنتج</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="transactionQuantity">الكمية</label>
+                    <input type="number" id="transactionQuantity" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="transactionNotes">ملاحظات</label>
+                    <textarea id="transactionNotes"></textarea>
+                </div>
+                <button type="submit" class="success">تسجيل الحركة</button>
+            </form>
+        </section>
+        
+        <!-- سجل الحركات -->
+        <section id="transactions" class="section">
+            <h2>سجل حركات المستودع</h2>
+            
+            <div class="form-group">
+                <label for="filterProduct">تصفية حسب المنتج</label>
+                <select id="filterProduct">
+                    <option value="">جميع المنتجات</option>
+                </select>
+            </div>
+            
+            <table id="transactionsTable">
+                <thead>
+                    <tr>
+                        <th>التاريخ</th>
+                        <th>المنتج</th>
+                        <th>النوع</th>
+                        <th>الكمية</th>
+                        <th>الملاحظات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- سيتم ملؤها بواسطة JavaScript -->
+                </tbody>
+            </table>
+        </section>
+        
+        <!-- التقارير -->
+        <section id="reports" class="section">
+            <h2>تقارير المخزون</h2>
+            
+            <div class="stats-container">
+                <div class="stat-box">
+                    <h3>إجمالي حركات الدخل</h3>
+                    <div class="value" id="totalIn">0</div>
+                </div>
+                <div class="stat-box">
+                    <h3>إجمالي حركات الخروج</h3>
+                    <div class="value" id="totalOut">0</div>
+                </div>
+            </div>
+            
+            <h2>أكثر المنتجات حركة</h2>
+            <table id="topProductsTable">
+                <thead>
+                    <tr>
+                        <th>المنتج</th>
+                        <th>إجمالي الدخل</th>
+                        <th>إجمالي الخروج</th>
+                        <th>صافي الحركة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- سيتم ملؤها بواسطة JavaScript -->
+                </tbody>
+            </table>
+        </section>
+    </div>
+
+    <script>
+        // بيانات التخزين
+        let products = JSON.parse(localStorage.getItem('warehouse_products')) || [];
+        let transactions = JSON.parse(localStorage.getItem('warehouse_transactions')) || [];
+        
+        // عناصر DOM
+        const alertBox = document.getElementById('alertBox');
+        const navButtons = document.querySelectorAll('.nav-btn');
+        const sections = document.querySelectorAll('.section');
+        
+        // عرض التنبيهات
+        function showAlert(message, type = 'success') {
+            alertBox.textContent = message;
+            alertBox.className = alert alert-${type};
+            alertBox.style.display = 'block';
+            
+            setTimeout(() => {
+                alertBox.style.display = 'none';
+            }, 3000);
+        }
+        
+        // التنقل بين الأقسام
+        navButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const target = button.getAttribute('data-target');
+                
+                navButtons.forEach(btn => btn.classList.remove('active'));
+                sections.forEach(section => section.classList.remove('active'));
+                
+                button.classList.add('active');
+                document.getElementById(target).classList.add('active');
+                
+                // عند الانتقال إلى قسم معين، قم بتحديث البيانات
+                if (target === 'dashboard') updateDashboard();
+                if (target === 'transactions') updateTransactions();
+                if (target === 'reports') updateReports();
+            });
+        });
+        
+        // تحديث لوحة التحكم
+        function updateDashboard() {
+            // حساب الإحصائيات
+            const totalProducts = products.length;
+            const totalQuantity = products.reduce((sum, product) => sum + product.quantity, 0);
+            const totalValue = products.reduce((sum, product) => sum + (product.price * product.quantity), 0);
+            
+            document.getElementById('totalProducts').textContent = totalProducts;
+            document.getElementById('totalQuantity').textContent = totalQuantity;
+            document.getElementById('totalValue').textContent = totalValue.toFixed(2);
+            
+            // المنتجات منخفضة المخزون
+            const lowStockProducts = products.filter(product => product.quantity <= product.alertQuantity);
+            const lowStockTable = document.getElementById('lowStockTable').querySelector('tbody');
+            lowStockTable.innerHTML = '';
+            
+            lowStockProducts.forEach(product => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${product.name}</td>
+                    <td>${product.quantity}</td>
+                    <td>${product.alertQuantity}</td>
+                `;
+                lowStockTable.appendChild(row);
+            });
+        }
+        
+        // إدارة المنتجات
+        const productForm = document.getElementById('productForm');
+        const resetProductFormBtn = document.getElementById('resetProductForm');
+        const productsTable = document.getElementById('productsTable').querySelector('tbody');
+        
+        // تعبئة جدول المنتجات
+        function updateProductsTable() {
+            productsTable.innerHTML = '';
+            
+            products.forEach(product => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${product.name}</td>
+                    <td>${product.category || '-'}</td>
+                    <td>${product.price.toFixed(2)}</td>
+                    <td>${product.quantity}</td>
+                    <td class="actions">
+                        <button class="edit-product" data-id="${product.id}">تعديل</button>
+                        <button class="danger delete-product" data-id="${product.id}">حذف</button>
+                    </td>
+                `;
+                productsTable.appendChild(row);
+            });
+            
+            // إضافة مستمعي الأحداث للأزرار
+            document.querySelectorAll('.edit-product').forEach(button => {
+                button.addEventListener('click', () => editProduct(button.getAttribute('data-id')));
+            });
+            
+            document.querySelectorAll('.delete-product').forEach(button => {
+                button.addEventListener('click', () => deleteProduct(button.getAttribute('data-id')));
+            });
+            
+            // تحديث القوائم المنسدلة للمنتجات
+            updateProductSelects();
+        }
+        
+        // تحديث القوائم المنسدلة للمنتجات
+        function updateProductSelects() {
+            const transactionProduct = document.getElementById('transactionProduct');
+            const filterProduct = document.getElementById('filterProduct');
+            
+            // حفظ القيم المحددة حالياً
+            const selectedTransaction = transactionProduct.value;
+            const selectedFilter = filterProduct.value;
+            
+            // تحديث قائمة منتجات الحركات
+            transactionProduct.innerHTML = '<option value="">اختر المنتج</option>';
+            products.forEach(product => {
+                const option = document.createElement('option');
+                option.value = product.id;
+                option.textContent = product.name;
+                transactionProduct.appendChild(option);
+            });
+            
+            // استعادة القيمة المحددة إن أمكن
+            if (selectedTransaction) {
+                transactionProduct.value = selectedTransaction;
+            }
+            
+            // تحديث قائمة منتجات التصفية
+            filterProduct.innerHTML = '<option value="">جميع المنتجات</option>';
+            products.forEach(product => {
+                const option = document.createElement('option');
+                option.value = product.id;
+                option.textContent = product.name;
+                filterProduct.appendChild(option);
+            });
+            
+            // استعادة القيمة المحددة إن أمكن
+            if (selectedFilter) {
+                filterProduct.value = selectedFilter;
+            }
+        }
+        
+        // إضافة/تعديل منتج
+        productForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const productId = document.getElementById('productId').value;
+            const name = document.getElementById('productName').value;
+            const description = document.getElementById('productDescription').value;
+            const category = document.getElementById('productCategory').value;
+            const price = parseFloat(document.getElementById('productPrice').value);
+            const alertQuantity = parseInt(document.getElementById('productAlertQuantity').value) || 5;
+            
+            if (productId) {
+                // تعديل منتج موجود
+                const index = products.findIndex(p => p.id === productId);
+                if (index !== -1) {
+                    products[index] = {
+                        ...products[index],
+                        name,
+                        description,
+                        category,
+                        price,
+                        alertQuantity
+                    };
+                    
+                    showAlert('تم تحديث المنتج بنجاح');
+                }
+            } else {
+                // إضافة منتج جديد
+                const newProduct = {
+                    id: Date.now().toString(),
+                    name,
+                    description,
+                    category,
+                    price,
+                    quantity: 0,
+                    alertQuantity
+                };
+                
+                products.push(newProduct);
+                showAlert('تم إضافة المنتج بنجاح');
+            }
+            
+            // حفظ البيانات وتحديث الواجهة
+            localStorage.setItem('warehouse_products', JSON.stringify(products));
+            updateProductsTable();
+            updateDashboard();
+            productForm.reset();
+            document.getElementById('productId').value = '';
+        });
+        
+        // زر إعادة تعيين نموذج المنتج
+        resetProductFormBtn.addEventListener('click', () => {
+            productForm.reset();
+            document.getElementById('productId').value = '';
+        });
+        
+        // تعديل منتج
+        function editProduct(id) {
+            const product = products.find(p => p.id === id);
+            if (product) {
+                document.getElementById('productId').value = product.id;
+                document.getElementById('productName').value = product.name;
+                document.getElementById('productDescription').value = product.description || '';
+                document.getElementById('productCategory').value = product.category || '';
+                document.getElementById('productPrice').value = product.price;
+                document.getElementById('productAlertQuantity').value = product.alertQuantity;
+                
+                // الانتقال إلى قسم المنتجات
+                navButtons.forEach(btn => btn.classList.remove('active'));
+                sections.forEach(section => section.classList.remove('active'));
+                
+                document.querySelector('[data-target="products"]').classList.add('active');
+                document.getElementById('products').classList.add('active');
+            }
+        }
+        
+        // حذف منتج
+        function deleteProduct(id) {
+            if (confirm('هل أنت متأكد من حذف هذا المنتج؟')) {
+                const index = products.findIndex(p => p.id === id);
+                if (index !== -1) {
+                    // التحقق من وجود حركات للمنتج
+                    const productTransactions = transactions.filter(t => t.productId === id);
+                    if (productTransactions.length > 0) {
+                        showAlert('لا يمكن حذف المنتج لأنه يحتوي على حركات مسجلة', 'danger');
+                        return;
+                    }
+                    
+                    products.splice(index, 1);
+                    localStorage.setItem('warehouse_products', JSON.stringify(products));
+                    updateProductsTable();
+                    updateDashboard();
+                    showAlert('تم حذف المنتج بنجاح');
+                }
+            }
+        }
+        
+        // إدارة الحركات
+        const transactionForm = document.getElementById('transactionForm');
+        
+        transactionForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const type = document.getElementById('transactionType').value;
+            const productId = document.getElementById('transactionProduct').value;
+            const quantity = parseInt(document.getElementById('transactionQuantity').value);
+            const notes = document.getElementById('transactionNotes').value;
+            
+            if (!productId) {
+                showAlert('يرجى اختيار منتج', 'danger');
+                return;
+            }
+            
+            const product = products.find(p => p.id === productId);
+            if (!product) {
+                showAlert('المنتج غير موجود', 'danger');
+                return;
+            }
+            
+            // التحقق من كمية الخروج
+            if (type === 'out' && product.quantity < quantity) {
+                showAlert('الكمية المتاحة غير كافية', 'danger');
+                return;
+            }
+            
+            // تحديث كمية المنتج
+            if (type === 'in') {
+                product.quantity += quantity;
+            } else {
+                product.quantity -= quantity;
+            }
+            
+            // تسجيل الحركة
+            const transaction = {
+                id: Date.now().toString(),
+                date: new Date().toISOString(),
+                type,
+                productId,
+                productName: product.name,
+                quantity,
+                notes
+            };
+            
+            transactions.push(transaction);
+            
+            // حفظ البيانات
+            localStorage.setItem('warehouse_products', JSON.stringify(products));
+            localStorage.setItem('warehouse_transactions', JSON.stringify(transactions));
+            
+            showAlert('تم تسجيل الحركة بنجاح');
+            transactionForm.reset();
+            updateProductsTable();
+            updateDashboard();
+        });
+        
+        // تحديث سجل الحركات
+        function updateTransactions() {
+            const filterProduct = document.getElementById('filterProduct');
+            const transactionsTable = document.getElementById('transactionsTable').querySelector('tbody');
+            
+            let filteredTransactions = transactions;
+            
+            // تطبيق التصفية حسب المنتج إذا تم اختياره
+            if (filterProduct.value) {
+                filteredTransactions = transactions.filter(t => t.productId === filterProduct.value);
+            }
+            
+            // عرض الحركات
+            transactionsTable.innerHTML = '';
+            
+            filteredTransactions.forEach(transaction => {
+                const date = new Date(transaction.date);
+                const formattedDate = ${date.toLocaleDateString()} ${date.toLocaleTimeString()};
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${formattedDate}</td>
+                    <td>${transaction.productName}</td>
+                    <td>${transaction.type === 'in' ? 'دخول' : 'خروج'}</td>
+                    <td>${transaction.quantity}</td>
+                    <td>${transaction.notes || '-'}</td>
+                `;
+                transactionsTable.appendChild(row);
+            });
+        }
+        
+        // تصفية الحركات حسب المنتج
+        document.getElementById('filterProduct').addEventListener('change', updateTransactions);
+        
+        // تحديث التقارير
+        function updateReports() {
+            // إحصائيات الحركات
+            const totalIn = transactions
+                .filter(t => t.type === 'in')
+                .reduce((sum, t) => sum + t.quantity, 0);
+                
+            const totalOut = transactions
+                .filter(t => t.type === 'out')
+                .reduce((sum, t) => sum + t.quantity, 0);
+                
+            document.getElementById('totalIn').textContent = totalIn;
+            document.getElementById('totalOut').textContent = totalOut;
+            
+            // أكثر المنتجات حركة
+            const productStats = {};
+            
+            products.forEach(product => {
+                productStats[product.id] = {
+                    name: product.name,
+                    in: 0,
+                    out: 0
+                };
+            });
+            
+            transactions.forEach(transaction => {
+                if (productStats[transaction.productId]) {
+                    if (transaction.type === 'in') {
+                        productStats[transaction.productId].in += transaction.quantity;
+                    } else {
+                        productStats[transaction.productId].out += transaction.quantity;
+                    }
+                }
+            });
+            
+            const topProductsTable = document.getElementById('topProductsTable').querySelector('tbody');
+            topProductsTable.innerHTML = '';
+            
+            Object.values(productStats).forEach(stats => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${stats.name}</td>
+                    <td>${stats.in}</td>
+                    <td>${stats.out}</td>
+                    <td>${stats.in - stats.out}</td>
+                `;
+                topProductsTable.appendChild(row);
+            });
+        }
+        
+        // تهيئة البيانات الأولية إذا لم توجد
+        function initializeData() {
+            if (products.length === 0) {
+                // إضافة بعض المنتجات الافتراضية
+                products = [
+                    {
+                        id: '1',
+                        name: 'جهاز كمبيوتر',
+                        description: 'جهاز كمبيوتر مكتبي',
+                        category: 'إلكترونيات',
+                        price: 2500,
+                        quantity: 10,
+                        alertQuantity: 2
+                    },
+                    {
+                        id: '2',
+                        name: 'طابعة',
+                        description: 'طابعة ليزر ملونة',
+                        category: 'إلكترونيات',
+                        price: 1200,
+                        quantity: 5,
+                        alertQuantity: 2
+                    },
+                    {
+                        id: '3',
+                        name: 'كرسي مكتب',
+                        description: 'كرسي مكتب مريح',
+                        category: 'أثاث',
+                        price: 500,
+                        quantity: 15,
+                        alertQuantity: 3
+                    }
+                ];
+                
+                localStorage.setItem('warehouse_products', JSON.stringify(products));
+            }
+            
+            if (transactions.length === 0) {
+                // إضافة بعض الحركات الافتراضية
+                transactions = [
+                    {
+                        id: '1',
+                        date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+                        type: 'in',
+                        productId: '1',
+                        productName: 'جهاز كمبيوتر',
+                        quantity: 10,
+                        notes: 'شحنة جديدة'
+                    },
+                    {
+                        id: '2',
+                        date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+                        type: 'in',
+                        productId: '2',
+                        productName: 'طابعة',
+                        quantity: 5,
+                        notes: 'شحنة طابعات'
+                    },
+                    {
+                        id: '3',
+                        date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+                        type: 'in',
+                        productId: '3',
+                        productName: 'كرسي مكتب',
+                        quantity: 15,
+                        notes: 'شحنة كراسي'
+                    },
+                    {
+                        id: '4',
+                        date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+                        type: 'out',
+                        productId: '1',
+                        productName: 'جهاز كمبيوتر',
+                        quantity: 3,
+                        notes: 'طلب من قسم المبيعات'
+                    }
+                ];
+                
+                localStorage.setItem('warehouse_transactions', JSON.stringify(transactions));
+                
+                // تحديث كميات المنتجات بناءً على الحركات
+                transactions.forEach(transaction => {
+                    const product = products.find(p => p.id === transaction.productId);
+                    if (product) {
+                        if (transaction.type === 'in') {
+                            product.quantity += transaction.quantity;
+                        } else {
+                            product.quantity -= transaction.quantity;
+                        }
+                    }
+                });
+                
+                localStorage.setItem('warehouse_products', JSON.stringify(products));
+            }
+        }
+        
+        // تهيئة التطبيق
+        function initApp() {
+            initializeData();
+            updateProductsTable();
+            updateProductSelects();
+            updateDashboard();
+            updateTransactions();
+            updateReports();
+        }
+        
+        // بدء التطبيق
+        initApp();
+    </script>
+</body>
+</html>
