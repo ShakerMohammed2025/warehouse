@@ -218,6 +218,10 @@
             .stats-container {
                 grid-template-columns: 1fr;
             }
+            
+            .actions {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
@@ -420,7 +424,7 @@
         // عرض التنبيهات
         function showAlert(message, type = 'success') {
             alertBox.textContent = message;
-            alertBox.className = alert alert-${type};
+            alertBox.className = `alert alert-${type}`;
             alertBox.style.display = 'block';
             
             setTimeout(() => {
@@ -720,7 +724,7 @@
             
             filteredTransactions.forEach(transaction => {
                 const date = new Date(transaction.date);
-                const formattedDate = ${date.toLocaleDateString()} ${date.toLocaleTimeString()};
+                const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
                 
                 const row = document.createElement('tr');
                 row.innerHTML = `
